@@ -24,6 +24,7 @@ TEKTRONIX CAPSTONE 2021-22
 from ctypes import *
 from os import chdir
 from time import sleep
+import os
 import time
 import numpy as np
 import matplotlib.pyplot as plt
@@ -39,6 +40,8 @@ from matplotlib import __version__ as __mversion__
 print('Matplotlib Version:', __mversion__)
 print('Numpy Version:', np.__version__)
 
+#get path name to save dpx images to correct directory
+pathName = os.getcwd()
 
 # C:\Tektronix\RSA_API\lib\x64 needs to be added to the
 # PATH system environment variable
@@ -206,7 +209,7 @@ def dpx_example():
 
     plt.tight_layout()
     ts = time.time()
-    filename = "C:\\Users\\gabby\\Documents\\Python Scripts\\" + str(ts) + ".png"
+    filename = pathName + str(ts) + ".png"
     plt.savefig(filename)
     plt.show()
     rsa.DEVICE_Disconnect()
