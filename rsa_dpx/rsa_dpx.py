@@ -14,6 +14,11 @@ Download the RSA_API Documentation:
 http://www.tek.com/spectrum-analyzer/rsa306-manual-6
 
 YOU WILL NEED TO REFERENCE THE API DOCUMENTATION
+####################################
+TEKTRONIX CAPSTONE 2021-22
+-using pieces of demo code for API as testing ground for ensuring server/client function properly
+-modified to display only a DPX frame in dpx example, as well as save to png when connected to by client
+####################################
 """
 
 from ctypes import *
@@ -224,14 +229,14 @@ def peak_power_detector(freq, trace):
 
 
 def main():
-        # uncomment the example you'd like to run
     s.listen(5)                 # Now wait for client connection.
+
+    #outputs dpx frame for every connection made
     while True:
         c, addr = s.accept()     # Establish connection with client.
         print ('Got connection from', addr)
         dpx_example()
         c.close()                # Close the connection
-
 
 if __name__ == '__main__':
     main()
