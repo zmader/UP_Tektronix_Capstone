@@ -29,12 +29,10 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 from RSA_API import *
-import socket               # Import socket module
+import timeit
 
-s = socket.socket()         # Create a socket object
-host = socket.gethostname() # Get local machine name
-port = 12345                # Reserve a port for your service.
-s.bind((host, port))        # Bind to the port
+#timer to check program runtime
+start = timeit.default_timer()
 
 from matplotlib import __version__ as __mversion__
 print('Matplotlib Version:', __mversion__)
@@ -47,6 +45,9 @@ pathName = os.getcwd()
 # PATH system environment variable
 chdir("C:\\Tektronix\\RSA_API\\lib\\x64")
 rsa = cdll.LoadLibrary("RSA_API.dll")
+
+#turn interactive plotting off (to help with img error)
+plt.ioff()
 
 
 """################CLASSES AND FUNCTIONS################"""
@@ -192,8 +193,18 @@ def dpx_example():
     numTicks = 11
     plotFreq = np.linspace(cf - span / 2.0, cf + span / 2.0, numTicks) / 1e9
 
+    stop = timeit.default_timer()
+    print("Time to connect: ", stop - start)
+
+    for x in range (20):
+        graph_dpx(refLevel, fb, dpxBitmap, numTicks, plotFreq)
+        stop = timeit.default_timer()
+        print("Time: ", stop - start)
+
+    rsa.DEVICE_Disconnect()
+
+def graph_dpx(refLevel, fb, dpxBitmap, numTicks, plotFreq):
     """################PLOT################"""
-    # Plot out the three DPX spectrum traces
     # Show the colorized DPX display
     fig = plt.figure(1)
     ax2 = fig.add_subplot()
@@ -209,11 +220,10 @@ def dpx_example():
 
     plt.tight_layout()
     ts = time.time()
-    filename = pathName + str(ts) + ".png"
+    #filename = pathName + str(ts) + ".png" #for multiple img files
+    filename = pathName + ".png" #for a single img file updated repeatedly
     plt.savefig(filename)
-    plt.show()
-    rsa.DEVICE_Disconnect()
-
+    plt.close()
 
 """################MISC################"""
 def config_trigger(trigMode=TriggerMode.triggered, trigLevel=-10,
@@ -231,15 +241,13 @@ def peak_power_detector(freq, trace):
     return peakPower, peakFreq
 
 
-def main():
-    s.listen(5)                 # Now wait for client connection.
 
-    #outputs dpx frame for every connection made
-    while True:
-        c, addr = s.accept()     # Establish connection with client.
-        print ('Got connection from', addr)
-        dpx_example()
-        c.close()                # Close the connection
+def main():
+    dpx_example()
+
+    #stops timer and prints out program runtime
+    stop = timeit.default_timer()
+    print("Total Time: ", stop - start)
 
 if __name__ == '__main__':
     main()
