@@ -9,7 +9,8 @@ def generateRandomInt():
 
     print(randomInt)
     #return randomInt
-    
+
+# Call the randomInt function defined above
 if __name__ == '__main__':
     generateRandomInt()
    
