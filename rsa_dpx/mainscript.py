@@ -1,4 +1,6 @@
 #script to spawn 2 threads, run rsa_dpx in one and clientdemo in the other
+#intended to be executed from Hololens/within Unity
+#Author: Gabby Marshak
 from time import sleep, perf_counter
 from threading import Thread
 

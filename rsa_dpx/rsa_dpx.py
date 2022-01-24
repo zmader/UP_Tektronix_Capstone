@@ -16,8 +16,15 @@ http://www.tek.com/spectrum-analyzer/rsa306-manual-6
 YOU WILL NEED TO REFERENCE THE API DOCUMENTATION
 ####################################
 TEKTRONIX CAPSTONE 2021-22
--using pieces of demo code for API as testing ground for ensuring server/client function properly
+-using pieces of demo code for API as testing ground/prototyping
 -modified to display only a DPX frame in dpx example, as well as save to png when connected to by client
+
+-server/client functionality removed, sticking to single device so networking is not needed
+-timers added to check speed of connection/write
+-loops etc added to get multiple images per run
+-TODO: integrate threading/joining for connection to Hololens
+-TODO: optimize graphing for performance
+    -blitting
 ####################################
 """
 
@@ -146,8 +153,11 @@ def extract_dpx_spectrum(fb):
     # When converting a ctypes pointer to a numpy array, we need to
     # explicitly specify its length to dereference it correctly
     dpxBitmap = np.array(fb.spectrumBitmap[:fb.spectrumBitmapSize])
+    print("original trace length: " + str(fb.spectrumTraceLength))
+    #resize/downsample should happen here (replace reshape or come after)
     dpxBitmap = dpxBitmap.reshape((fb.spectrumBitmapHeight,
                                    fb.spectrumBitmapWidth))
+    #dpxBitmap = dpxBitmap.resize((200,800))
 
     # Grab trace data and convert from W to dBm
     # http://www.rapidtables.com/convert/power/Watt_to_dBm.htm
@@ -180,6 +190,18 @@ def extract_dpxogram(fb):
 def dpx_example():
     print('\n\n########DPX Example########')
     search_connect()
+
+    connecttime = timeit.default_timer()
+    print("Time to connect: ", connecttime - start)
+
+    for x in range (20):
+        print("##########################")
+        graph_dpx()
+        # stop = timeit.default_timer()
+
+    rsa.DEVICE_Disconnect()
+
+def graph_dpx():
     cf = 2.4453e9
     refLevel = -30
     span = 40e6
@@ -193,19 +215,9 @@ def dpx_example():
     numTicks = 11
     plotFreq = np.linspace(cf - span / 2.0, cf + span / 2.0, numTicks) / 1e9
 
-    stop = timeit.default_timer()
-    print("Time to connect: ", stop - start)
-
-    for x in range (20):
-        graph_dpx(refLevel, fb, dpxBitmap, numTicks, plotFreq)
-        stop = timeit.default_timer()
-        print("Time: ", stop - start)
-
-    rsa.DEVICE_Disconnect()
-
-def graph_dpx(refLevel, fb, dpxBitmap, numTicks, plotFreq):
     """################PLOT################"""
-    # Show the colorized DPX display
+    #Show the colorized DPX display
+    graphstart = timeit.default_timer()
     fig = plt.figure(1)
     ax2 = fig.add_subplot()
     ax2.imshow(dpxBitmap, cmap='gist_stern')
@@ -224,6 +236,8 @@ def graph_dpx(refLevel, fb, dpxBitmap, numTicks, plotFreq):
     filename = pathName + ".png" #for a single img file updated repeatedly
     plt.savefig(filename)
     plt.close()
+    graphstop = timeit.default_timer()
+    print("Time to graph: ", graphstop - graphstart)
 
 """################MISC################"""
 def config_trigger(trigMode=TriggerMode.triggered, trigLevel=-10,
