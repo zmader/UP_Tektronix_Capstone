@@ -194,8 +194,11 @@ def dpx_example():
     connecttime = timeit.default_timer()
     print("Time to connect: ", connecttime - start)
 
+    #draw background (once)
+
     for x in range (20):
         print("##########################")
+        #draw graph (every time)
         graph_dpx()
         # stop = timeit.default_timer()
 
@@ -209,6 +212,8 @@ def graph_dpx():
 
     dpxFreq, dpxAmp = config_DPX(cf, refLevel, span, rbw)
     fb = acquire_dpx_frame()
+    #print("SPECTRUM TRACE: ")
+    #print(fb.spectrumTraces)
 
     dpxBitmap, traces = extract_dpx_spectrum(fb)
     dpxogram = extract_dpxogram(fb)
@@ -219,16 +224,17 @@ def graph_dpx():
     #Show the colorized DPX display
     graphstart = timeit.default_timer()
     fig = plt.figure(1)
+    plt.axis("off")
     ax2 = fig.add_subplot()
     ax2.imshow(dpxBitmap, cmap='gist_stern')
     ax2.set_aspect(4)
-    ax2.set_title('DPX Bitmap')
-    ax2.set_xlabel('Frequency (GHz)')
-    ax2.set_ylabel('Amplitude (dBm)')
-    xTicks = map('{:.4}'.format, plotFreq)
-    plt.xticks(np.linspace(0, fb.spectrumBitmapWidth, numTicks), xTicks)
-    yTicks = map('{}'.format, np.linspace(refLevel, refLevel - 100, numTicks))
-    plt.yticks(np.linspace(0, fb.spectrumBitmapHeight, numTicks), yTicks)
+    #ax2.set_title('DPX Bitmap')
+    #ax2.set_xlabel('Frequency (GHz)')
+    #ax2.set_ylabel('Amplitude (dBm)')
+    #xTicks = map('{:.4}'.format, plotFreq)
+    #plt.xticks(np.linspace(0, fb.spectrumBitmapWidth, numTicks), xTicks)
+    #yTicks = map('{}'.format, np.linspace(refLevel, refLevel - 100, numTicks))
+    #plt.yticks(np.linspace(0, fb.spectrumBitmapHeight, numTicks), yTicks)
 
     plt.tight_layout()
     ts = time.time()
@@ -237,7 +243,11 @@ def graph_dpx():
     plt.savefig(filename)
     plt.close()
     graphstop = timeit.default_timer()
-    print("Time to graph: ", graphstop - graphstart)
+    graphtime = graphstop - graphstart
+    print("Time to graph: ", graphtime)
+    file = open(pathName + "_no_bg.txt", "a")
+    file.write(str(graphtime) + "\n")
+    file.close()
 
 """################MISC################"""
 def config_trigger(trigMode=TriggerMode.triggered, trigLevel=-10,
