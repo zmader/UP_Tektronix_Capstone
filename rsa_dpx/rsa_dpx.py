@@ -153,8 +153,6 @@ def extract_dpx_spectrum(fb):
     # When converting a ctypes pointer to a numpy array, we need to
     # explicitly specify its length to dereference it correctly
     dpxBitmap = np.array(fb.spectrumBitmap[:fb.spectrumBitmapSize])
-    print("original trace length: " + str(fb.spectrumTraceLength))
-    #resize/downsample should happen here (replace reshape or come after)
     dpxBitmap = dpxBitmap.reshape((fb.spectrumBitmapHeight,
                                    fb.spectrumBitmapWidth))
     #dpxBitmap = dpxBitmap.resize((200,800))
@@ -195,12 +193,12 @@ def dpx_example():
     print("Time to connect: ", connecttime - start)
 
     #draw background (once)
+    graph_axis()
 
     for x in range (20):
         print("##########################")
         #draw graph (every time)
         graph_dpx()
-        # stop = timeit.default_timer()
 
     rsa.DEVICE_Disconnect()
 
@@ -212,8 +210,6 @@ def graph_dpx():
 
     dpxFreq, dpxAmp = config_DPX(cf, refLevel, span, rbw)
     fb = acquire_dpx_frame()
-    #print("SPECTRUM TRACE: ")
-    #print(fb.spectrumTraces)
 
     dpxBitmap, traces = extract_dpx_spectrum(fb)
     dpxogram = extract_dpxogram(fb)
@@ -228,13 +224,6 @@ def graph_dpx():
     ax2 = fig.add_subplot()
     ax2.imshow(dpxBitmap, cmap='gist_stern')
     ax2.set_aspect(4)
-    #ax2.set_title('DPX Bitmap')
-    #ax2.set_xlabel('Frequency (GHz)')
-    #ax2.set_ylabel('Amplitude (dBm)')
-    #xTicks = map('{:.4}'.format, plotFreq)
-    #plt.xticks(np.linspace(0, fb.spectrumBitmapWidth, numTicks), xTicks)
-    #yTicks = map('{}'.format, np.linspace(refLevel, refLevel - 100, numTicks))
-    #plt.yticks(np.linspace(0, fb.spectrumBitmapHeight, numTicks), yTicks)
 
     plt.tight_layout()
     ts = time.time()
@@ -245,9 +234,44 @@ def graph_dpx():
     graphstop = timeit.default_timer()
     graphtime = graphstop - graphstart
     print("Time to graph: ", graphtime)
-    file = open(pathName + "_no_bg.txt", "a")
-    file.write(str(graphtime) + "\n")
-    file.close()
+    # file = open(pathName + "_no_bg.txt", "a")
+    # file.write(str(graphtime) + "\n")
+    # file.close()
+
+def graph_axis():
+    cf = 2.4453e9
+    refLevel = -30
+    span = 40e6
+    rbw = 100e3
+
+    dpxFreq, dpxAmp = config_DPX(cf, refLevel, span, rbw)
+    fb = acquire_dpx_frame()
+
+    #dpxBitmap, traces = extract_dpx_spectrum(fb)
+    dpxogram = extract_dpxogram(fb)
+    numTicks = 11
+    plotFreq = np.linspace(cf - span / 2.0, cf + span / 2.0, numTicks) / 1e9
+
+    """################PLOT################"""
+    #graph the axis by themselves
+    fig = plt.figure(1)
+    ax2 = fig.add_subplot()
+    #ax2.imshow(dpxBitmap, cmap='gist_stern')
+    ax2.set_aspect(4)
+    ax2.set_title('DPX Bitmap')
+    ax2.set_xlabel('Frequency (GHz)')
+    ax2.set_ylabel('Amplitude (dBm)')
+    xTicks = map('{:.4}'.format, plotFreq)
+    plt.xticks(np.linspace(0, fb.spectrumBitmapWidth, numTicks), xTicks)
+    yTicks = map('{}'.format, np.linspace(refLevel, refLevel - 100, numTicks))
+    plt.yticks(np.linspace(0, fb.spectrumBitmapHeight, numTicks), yTicks)
+
+    plt.tight_layout()
+    ts = time.time()
+    #filename = pathName + str(ts) + ".png" #for multiple img files
+    filename = pathName + "_axis.png" #for a single img file updated repeatedly
+    plt.savefig(filename)
+    plt.close()
 
 """################MISC################"""
 def config_trigger(trigMode=TriggerMode.triggered, trigLevel=-10,
