@@ -23,8 +23,6 @@ TEKTRONIX CAPSTONE 2021-22
 -timers added to check speed of connection/write
 -loops etc added to get multiple images per run
 -TODO: integrate threading/joining for connection to Hololens
--TODO: optimize graphing for performance
-    -blitting
 ####################################
 """
 
@@ -195,10 +193,16 @@ def dpx_example():
     #draw background (once)
     graph_axis()
 
-    for x in range (20):
+    #for x in range (20):
+    #infinite while loop, will grab new frame on every input until quit command given
+    while True:
         print("##########################")
         #draw graph (every time)
         graph_dpx()
+
+        if input() == "q":
+            break
+
 
     rsa.DEVICE_Disconnect()
 
@@ -234,9 +238,6 @@ def graph_dpx():
     graphstop = timeit.default_timer()
     graphtime = graphstop - graphstart
     print("Time to graph: ", graphtime)
-    # file = open(pathName + "_no_bg.txt", "a")
-    # file.write(str(graphtime) + "\n")
-    # file.close()
 
 def graph_axis():
     cf = 2.4453e9
@@ -267,9 +268,7 @@ def graph_axis():
     plt.yticks(np.linspace(0, fb.spectrumBitmapHeight, numTicks), yTicks)
 
     plt.tight_layout()
-    ts = time.time()
-    #filename = pathName + str(ts) + ".png" #for multiple img files
-    filename = pathName + "_axis.png" #for a single img file updated repeatedly
+    filename = pathName + "_axis.png"
     plt.savefig(filename)
     plt.close()
 
@@ -294,8 +293,8 @@ def main():
     dpx_example()
 
     #stops timer and prints out program runtime
-    stop = timeit.default_timer()
-    print("Total Time: ", stop - start)
+    #stop = timeit.default_timer()
+    #print("Total Time: ", stop - start)
 
 if __name__ == '__main__':
     main()
