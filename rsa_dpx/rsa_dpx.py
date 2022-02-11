@@ -35,6 +35,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from RSA_API import *
 import timeit
+from threading import *
 
 #timer to check program runtime
 start = timeit.default_timer()
@@ -53,7 +54,6 @@ rsa = cdll.LoadLibrary("RSA_API.dll")
 
 #turn interactive plotting off (to help with img error)
 plt.ioff()
-
 
 """################CLASSES AND FUNCTIONS################"""
 def err_check(rs):
@@ -190,27 +190,50 @@ def dpx_example():
     connecttime = timeit.default_timer()
     print("Time to connect: ", connecttime - start)
 
-    #draw background (once)
-    graph_axis()
-
-    #for x in range (20):
-    #infinite while loop, will grab new frame on every input until quit command given
-    while True:
-        print("##########################")
-        #draw graph (every time)
-        graph_dpx()
-
-        if input() == "q":
-            break
-
-
-    rsa.DEVICE_Disconnect()
-
-def graph_dpx():
+    #parameters
     cf = 2.4453e9
     refLevel = -30
     span = 40e6
     rbw = 100e3
+
+    #set up quit event
+    quit = Event()
+
+    #draw background (once)
+    graph_axis(cf, refLevel, span, rbw)
+
+    #spawn new thread to continuously graph dpx frames
+    dpx_thread = Thread(target=dpx_loop,args=(quit, cf, refLevel, span, rbw))
+    dpx_thread.start()
+    print("thread started")
+
+    #get input from keyboard, send quit command
+    print("press any key to quit:")
+    input()
+    quit.set()
+
+    dpx_thread.join()
+    print("done")
+
+    rsa.DEVICE_Disconnect()
+
+
+def dpx_loop(quit, cf, refLevel, span, rbw):
+    while(True):
+    #for x in range(100):
+        print("##########################")
+        #draw graph (every time)
+        graph_dpx(cf, refLevel, span, rbw)
+
+        #check if quit was triggered
+        if quit.isSet():
+            print("quitting...")
+            break
+
+
+
+
+def graph_dpx(cf, refLevel, span, rbw):
 
     dpxFreq, dpxAmp = config_DPX(cf, refLevel, span, rbw)
     fb = acquire_dpx_frame()
@@ -239,11 +262,7 @@ def graph_dpx():
     graphtime = graphstop - graphstart
     print("Time to graph: ", graphtime)
 
-def graph_axis():
-    cf = 2.4453e9
-    refLevel = -30
-    span = 40e6
-    rbw = 100e3
+def graph_axis(cf, refLevel, span, rbw):
 
     dpxFreq, dpxAmp = config_DPX(cf, refLevel, span, rbw)
     fb = acquire_dpx_frame()
