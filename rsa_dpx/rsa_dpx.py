@@ -36,6 +36,7 @@ import matplotlib.pyplot as plt
 from RSA_API import *
 import timeit
 from threading import *
+import sys
 
 #timer to check program runtime
 start = timeit.default_timer()
@@ -190,11 +191,16 @@ def dpx_example():
     connecttime = timeit.default_timer()
     print("Time to connect: ", connecttime - start)
 
+    cf = float(sys.argv[1])
+    refLevel = int(sys.argv[2])
+    span = float(sys.argv[3])
+    rbw = float(sys.argv[4])
+
     #parameters
-    cf = 2.4453e9
-    refLevel = -30
-    span = 40e6
-    rbw = 100e3
+    # cf = 2.4453e9
+    # refLevel = -30
+    # span = 40e6
+    # rbw = 100e3
 
     #set up quit event
     quit = Event()
