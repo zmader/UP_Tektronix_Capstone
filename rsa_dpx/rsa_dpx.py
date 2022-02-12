@@ -22,6 +22,7 @@ TEKTRONIX CAPSTONE 2021-22
 -server/client functionality removed, sticking to single device so networking is not needed
 -timers added to check speed of connection/write
 -loops etc added to get multiple images per run
+-program can pull dpx frames indefinitely until told to quit
 -TODO: integrate threading/joining for connection to Hololens
 ####################################
 """
@@ -190,7 +191,7 @@ def dpx_example():
     connecttime = timeit.default_timer()
     print("Time to connect: ", connecttime - start)
 
-    #parameters
+    #parameters (temp hardcoded)
     cf = 2.4453e9
     refLevel = -30
     span = 40e6
@@ -312,8 +313,8 @@ def main():
     dpx_example()
 
     #stops timer and prints out program runtime
-    #stop = timeit.default_timer()
-    #print("Total Time: ", stop - start)
+    stop = timeit.default_timer()
+    print("Total Time: ", stop - start)
 
 if __name__ == '__main__':
     main()
