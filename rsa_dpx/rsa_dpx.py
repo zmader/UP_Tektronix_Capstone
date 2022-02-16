@@ -37,6 +37,7 @@ from RSA_API import *
 import timeit
 from threading import *
 import sys
+import re
 
 #timer to check program runtime
 start = timeit.default_timer()
@@ -211,12 +212,58 @@ def dpx_example():
     #spawn new thread to continuously graph dpx frames
     dpx_thread = Thread(target=dpx_loop,args=(quit, cf, refLevel, span, rbw))
     dpx_thread.start()
-    print("thread started")
+    print("thread started") 
 
-    #get input from keyboard, send quit command
-    print("press any key to quit:")
-    input()
-    quit.set()
+    #loop to see if graph params are changed
+    #to change, in command line type the variable to change followed by
+    #an eqauls, followed by the number
+    #i.e: "span = 42e6" or "reflevel = -45" or "cf = 2.44e8" or "rbw = 100e2"
+    while(True):
+        #get input from keyboard
+        print("press letter q to quit:")
+        string = input()
+        string = string.lower()
+
+        #if the character typed was q, quit break out of loop and 
+        #send signal to stop thread
+        if(string == "q"):
+            quit.set()
+            break
+
+        #if want to change cf
+        if "cf" in string:
+            print("input was cf")
+            num = string.split('=')
+            print("setting cf to " + num[1])
+            cf = float(num[1])
+            graph_axis(cf, refLevel, span, rbw)
+
+        #if want to change reflevel
+        elif "reflevel" in string:
+            print("input was refLevel")
+            num = string.split('=')
+            print("setting refLevel to " + num[1])
+            refLevel = float(num[1])
+            graph_axis(cf, refLevel, span, rbw)
+
+        #if want to change span
+        elif "span" in string:
+            print("input was span")
+            num = string.split('=')
+            print("setting span to " + num[1])
+            span = float(num[1])
+            graph_axis(cf, refLevel, span, rbw)
+
+        #if want to change rbw
+        elif "rbw" in string:
+            print("input was rbw")
+            num = string.split('=')
+            print("setting rbw to " + num[1])
+            rbw = float(num[1]) 
+            graph_axis(cf, refLevel, span, rbw)
+
+        #print out the changed values
+        print("cf = " + str(cf) + " refLevel = " + str(refLevel) + " span = " + str(span) + " rbw = " + str(rbw))
 
     dpx_thread.join()
     print("done")
@@ -224,10 +271,11 @@ def dpx_example():
     rsa.DEVICE_Disconnect()
 
 
+
 def dpx_loop(quit, cf, refLevel, span, rbw):
     while(True):
     #for x in range(100):
-        print("##########################")
+        #print("##########################")
         #draw graph (every time)
         graph_dpx(cf, refLevel, span, rbw)
 
@@ -266,7 +314,7 @@ def graph_dpx(cf, refLevel, span, rbw):
     plt.close()
     graphstop = timeit.default_timer()
     graphtime = graphstop - graphstart
-    print("Time to graph: ", graphtime)
+    #print("Time to graph: ", graphtime)
 
 def graph_axis(cf, refLevel, span, rbw):
 
