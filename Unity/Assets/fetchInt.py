@@ -1,20 +1,16 @@
-# This is a sample Python script.
+# This python script generates a random integer ranging from 0 to 100.
 # By: Kyle Sanchez
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 import random
 
 def generateRandomInt():
-    # Python script to randomly generate a number
+    # Create a randomInt variable from the range 0 to 100
     randomInt = random.randint(0, 100)
 
     print(randomInt)
     #return randomInt
 
-# Press the green button in the gutter to run the script.
+# Call the randomInt function defined above
 if __name__ == '__main__':
     generateRandomInt()
-    
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+   
